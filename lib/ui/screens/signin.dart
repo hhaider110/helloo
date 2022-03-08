@@ -1,8 +1,11 @@
 // ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 //import 'package:http/http.dart';
 import 'package:ui/constants/constants.dart';
+import 'package:ui/gen_l10n/ui.dart';
+import 'package:ui/l10n/l10n.dart';
 import 'package:ui/ui/widgets/custom_button.dart';
 import 'package:ui/ui/widgets/custom_shape.dart';
 import 'package:ui/ui/widgets/model_class.dart';
@@ -49,6 +52,8 @@ class _SignInScreenState extends State<SignInScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final provider = Provider.of<LocaleProvider>(context);
+    final locale = provider.locale ?? Locale('en');
     _height = MediaQuery
         .of(context)
         .size
@@ -72,9 +77,38 @@ class _SignInScreenState extends State<SignInScreen> {
           child: Column(
             children: [
               clipShape(),
-              LanguagePickerWidget(),
+          //    LanguagePickerWidget(),
+              DropdownButtonHideUnderline(
+                child: DropdownButton(
+                  value: locale,
+                  icon: Container(width: 12),
+                  items: L10n.all.map(
+                        (locale) {
+                      final flag = L10n.getFlag(locale.languageCode);
+
+                      return DropdownMenuItem(
+                        child: Center(
+                          child: Text(
+                            flag,
+                            style: TextStyle(fontSize: 32),
+                          ),
+                        ),
+                        value: locale,
+                        onTap: () {
+                          final provider =
+                          Provider.of<LocaleProvider>(context, listen: false);
+                          print(provider.locale);
+
+                          provider.setLocale(locale);
+                        },
+                      );
+                    },
+                  ).toList(),
+                  onChanged: (_) {},
+                ),
+              ),
               const SizedBox(width: 12),
-              welcomeTextRow(),
+              welcomeTextRow(ui.of(context)!.welcomeText),
               signInTextRow(),
               form(),
               forgetPassTextRow(),
@@ -157,13 +191,13 @@ class _SignInScreenState extends State<SignInScreen> {
 
 
 
-  Widget welcomeTextRow() {
+  Widget welcomeTextRow(text) {
     return Container(
       margin: EdgeInsets.only(left: _width / 20, top: _height / 100),
       child: Row(
         children: <Widget>[
           Text(
-            "Welcome To AimsysCloud",
+            text,
             style: TextStyle(
               color: contrastColor,
               fontWeight: FontWeight.bold,
